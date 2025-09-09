@@ -43,9 +43,13 @@ if uploaded_zip is not None:
 def mark_attendance(class_image):
     attendance = []
 
-    # Detect faces from classroom image
+    # Detect faces from classroom image using opencv backend (not retinaface)
     try:
-        faces = DeepFace.extract_faces(img_path=class_image, enforce_detection=False)
+        faces = DeepFace.extract_faces(
+            img_path=class_image,
+            detector_backend="opencv",   # 👈 avoid RetinaFace / Keras3 issue
+            enforce_detection=False
+        )
     except Exception as e:
         st.error(f"⚠ Error detecting faces: {e}")
         return []
