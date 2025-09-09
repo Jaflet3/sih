@@ -1,10 +1,13 @@
 # ✅ Install dependencies before running
 # pip install streamlit opencv-python-headless deepface pandas
 
-import streamlit as st
-import os, zipfile, cv2, pandas as pd
+import os
+import zipfile
+import cv2
+import pandas as pd
 from deepface import DeepFace
 from datetime import datetime
+import streamlit as st
 
 st.title("🎓 Smart Attendance System (SIH v2)")
 
@@ -62,34 +65,4 @@ def mark_attendance(class_image):
                 if result['verified']:
                     matched_students.add(name)
                     attendance.append({"Name": name, "Status": "Present", "Time": datetime.now()})
-            except Exception as e:
-                st.warning(f"⚠ Error verifying {name}: {e}")
-    
-    # Mark absent students
-    for name in students_db:
-        if name not in matched_students:
-            attendance.append({"Name": name, "Status": "Absent", "Time": datetime.now()})
-    
-    return attendance
-
-# --------------------------
-# STEP 3: Upload Classroom Image
-# --------------------------
-uploaded_class = st.file_uploader("🖼️ Upload Classroom Image", type=["jpg", "png"])
-
-if uploaded_class is not None and students_db:
-    class_path = "class.jpg"
-    with open(class_path, "wb") as f:
-        f.write(uploaded_class.read())
-
-    if st.button("📌 Mark Attendance"):
-        records = mark_attendance(class_path)
-        if records:
-            df = pd.DataFrame(records)
-            st.dataframe(df)
-
-            # Save CSV
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("⬇️ Download Attendance CSV", csv, "attendance.csv", "text/csv")
-        else:
-            st.error("⚠ No attendance data recorded.")
+            except Exception as
