@@ -1,12 +1,12 @@
-# ✅ Install dependencies before running
-# pip install streamlit opencv-python-headless deepface pandas
+# ✅ Install dependencies before running:
+# pip install streamlit deepface pandas pillow
 
 import os
 import zipfile
-import cv2
 import pandas as pd
 from deepface import DeepFace
 from datetime import datetime
+from PIL import Image
 import streamlit as st
 
 st.title("🎓 Smart Attendance System (SIH v2)")
@@ -21,7 +21,7 @@ extract_folder = "students"
 
 if uploaded_zip is not None:
     # Save uploaded file
-    zip_path = os.path.join("students.zip")
+    zip_path = "students.zip"
     with open(zip_path, "wb") as f:
         f.write(uploaded_zip.read())
     
@@ -31,7 +31,7 @@ if uploaded_zip is not None:
     
     st.success("✅ Extracted student images!")
     student_files = os.listdir(extract_folder)
-    st.write("Enrolled Students:", student_files)
+    st.write("📌 Enrolled Students:", student_files)
 
     # Build DB
     for file in student_files:
@@ -45,17 +45,17 @@ if uploaded_zip is not None:
 def mark_attendance(class_image):
     attendance = []
 
-    # Detect faces
+    # Detect faces from classroom image
     try:
         faces = DeepFace.extract_faces(img_path=class_image, enforce_detection=False)
     except Exception as e:
         st.error(f"⚠ Error detecting faces: {e}")
-        faces = []
-    
+        return []
+
     matched_students = set()
 
     for face_obj in faces:
-        face_img = face_obj['face']
+        face_img = face_obj['face']  # numpy array of the face
         for name, path in students_db.items():
             if name in matched_students:
                 continue
@@ -75,7 +75,7 @@ def mark_attendance(class_image):
                     })
             except Exception as e:
                 st.warning(f"⚠ Error verifying {name}: {e}")
-    
+
     # Mark absent students
     for name in students_db:
         if name not in matched_students:
@@ -96,6 +96,8 @@ if uploaded_class is not None and students_db:
     class_path = "class.jpg"
     with open(class_path, "wb") as f:
         f.write(uploaded_class.read())
+
+    st.image(Image.open(class_path), caption="Classroom Image", use_column_width=True)
 
     if st.button("📌 Mark Attendance"):
         records = mark_attendance(class_path)
