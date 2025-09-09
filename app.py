@@ -60,9 +60,51 @@ def mark_attendance(class_image):
             if name in matched_students:
                 continue
             try:
-                result = DeepFace.verify(img1_path=face_img, img2_path=path,
-                                         enforce_detection=False, model_name="Facenet")
+                result = DeepFace.verify(
+                    img1_path=face_img,
+                    img2_path=path,
+                    enforce_detection=False,
+                    model_name="Facenet"
+                )
                 if result['verified']:
                     matched_students.add(name)
-                    attendance.append({"Name": name, "Status": "Present", "Time": datetime.now()})
-            except Exception as
+                    attendance.append({
+                        "Name": name,
+                        "Status": "Present",
+                        "Time": datetime.now()
+                    })
+            except Exception as e:
+                st.warning(f"⚠ Error verifying {name}: {e}")
+    
+    # Mark absent students
+    for name in students_db:
+        if name not in matched_students:
+            attendance.append({
+                "Name": name,
+                "Status": "Absent",
+                "Time": datetime.now()
+            })
+    
+    return attendance
+
+# --------------------------
+# STEP 3: Upload Classroom Image
+# --------------------------
+uploaded_class = st.file_uploader("🖼️ Upload Classroom Image", type=["jpg", "png"])
+
+if uploaded_class is not None and students_db:
+    class_path = "class.jpg"
+    with open(class_path, "wb") as f:
+        f.write(uploaded_class.read())
+
+    if st.button("📌 Mark Attendance"):
+        records = mark_attendance(class_path)
+        if records:
+            df = pd.DataFrame(records)
+            st.dataframe(df)
+
+            # Save CSV
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("⬇️ Download Attendance CSV", csv, "attendance.csv", "text/csv")
+        else:
+            st.error("⚠ No attendance data recorded.")
