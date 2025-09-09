@@ -1,6 +1,3 @@
-# ✅ Install dependencies before running:
-# pip install streamlit deepface pandas pillow
-
 import os
 import zipfile
 import pandas as pd
@@ -9,6 +6,7 @@ from datetime import datetime
 from PIL import Image
 import streamlit as st
 
+st.set_page_config(page_title="Smart Attendance System", layout="centered")
 st.title("🎓 Smart Attendance System (SIH v2)")
 
 # --------------------------
